@@ -1,0 +1,70 @@
+-- Activar claves foráneas
+PRAGMA foreign_keys = ON;
+
+-- Tabla: Sensor
+CREATE TABLE Sensor (
+    sensor_id INTEGER PRIMARY KEY,
+    ubicacion TEXT,
+    descripcion TEXT
+);
+
+-- Tabla: Lectura
+CREATE TABLE Lectura (
+    lectura_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sensor_id INTEGER NOT NULL,
+    fecha_hora DATETIME NOT NULL,
+    temperatura REAL NOT NULL,
+    presion REAL NOT NULL,
+    humedad REAL NOT NULL,
+    FOREIGN KEY (sensor_id) REFERENCES Sensor(sensor_id)
+);
+
+-- Tabla: Tipo_Alerta
+CREATE TABLE Tipo_Alerta (
+    tipo_alerta_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    descripcion TEXT NOT NULL UNIQUE
+);
+
+-- Tabla: Alerta
+CREATE TABLE Alerta (
+    alerta_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    lectura_id INTEGER NOT NULL,
+    tipo_alerta_id INTEGER NOT NULL,
+    fecha_generada DATETIME NOT NULL,
+    FOREIGN KEY (lectura_id) REFERENCES Lectura(lectura_id),
+    FOREIGN KEY (tipo_alerta_id) REFERENCES Tipo_Alerta(tipo_alerta_id)
+);
+
+-- Tabla: Log_Evento
+CREATE TABLE Log_Evento (
+    log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    evento TEXT NOT NULL,
+    fecha_hora DATETIME NOT NULL,
+    estado TEXT NOT NULL
+);
+
+#################################################################################
+Sensor: (en este caso solo deberiamos usar uno)
+Sirve como referencia para las lecturas que llegan desde ese sensor.
+
+Lectura: Registra cada paquete de datos recibido desde un sensor: temperatura, presión y humedad con su fecha y hora.
+
+Tipo_Alerta: tabla auxiliar para tener bien definidos los tipos de alerta.
+
+Alerta: tabla auxiliar para mayor trazabilidad de los sensores. Es especifico para anomalias de datos
+
+Log_Evento: Registra eventos del sistema. (no confundir con alerta, esto es para casos externos a los datos de sensores)
+evento y estado es muy general para permitir mayor flexibilidad en lo que se desea registrar.
+Ejemplos:
+INSERT INTO Log_Evento (evento, fecha_hora, estado)
+VALUES (
+  'Servidor intermedio conectado exitosamente al servidor final',
+  '2025-06-17 19:30:00',
+  'OK'
+);
+INSERT INTO Log_Evento (evento, fecha_hora, estado)
+VALUES (
+  'Error al recibir paquete desde Cliente Sensor',
+  '2025-06-17 19:32:45',
+  'ERROR'
+);
