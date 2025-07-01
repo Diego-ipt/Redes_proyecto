@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Visualización Monitoreo Industrial</title>
+  <link rel="stylesheet" href="styles.css" />
+
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
+<body>
+  <h1>Datos de monitoreo</h1>
+
+  <div id="container">
+    <table id="tabla-lecturas" class="display">
+      <thead>
+        <tr>
+          <th>Sensor ID</th>
+          <th>Fecha y Hora</th>
+          <th>Temperatura</th>
+          <th>Presión</th>
+          <th>Humedad</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div id="charts">
+      <div class="chart-container">
+        <div class="chart-title">Temperatura</div>
+        <canvas id="chartTemp"></canvas>
+      </div>
+      <div class="chart-container">
+        <div class="chart-title">Presión</div>
+        <canvas id="chartPresion"></canvas>
+      </div>
+      <div class="chart-container">
+        <div class="chart-title">Humedad</div>
+        <canvas id="chartHumedad"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
