@@ -3,7 +3,7 @@ import sqlite3
 
 app = Flask(__name__)
 DB_PATH = "IoT_Distribuida.db"
-COLUMNAS = ["id", "sensor_id", "fecha_hora", "temperatura", "presion", "humedad"]
+COLUMNAS = ["lectura_id", "sensor_id", "fecha_hora", "temperatura", "presion", "humedad"]
 
 # ver todas las lecturas
 @app.route("/lecturas", methods=["GET"])
