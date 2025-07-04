@@ -15,8 +15,16 @@ async function iniciarClienteConsulta() {
 
 async function cargarDatos() {
   try {
-    const response = await fetch("prueba.json"); //por el momento carga datos estáticos.
-    const datos = await response.json();  
+    // Calcula la fecha/hora de hace 8 horas en formato compatible con tu API
+    const ahora = new Date();
+    const hace8h = new Date(ahora.getTime() - 8 * 60 * 60 * 1000);
+    // Formato: YYYY-MM-DDTHH:mm:ss
+    const fechaStr = hace8h.toISOString().slice(0,19);
+
+    // Llama al endpoint filtrado
+    const response = await fetch(`http://localhost:5000/lecturas/desde/${fechaStr}`);
+    const datos = await response.json();
+
     actualizarTabla(datos);
     actualizarGraficosDesdeTabla();
     detectarAlertas(datos);
