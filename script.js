@@ -152,15 +152,6 @@ function actualizarGraficosDesdeTabla() {
   actualizar(chartHumedad, humedadData, Math.min(...humedadData), Math.max(...humedadData));
 }
 
-function detectarAlertas(datos) {
-  const alertas = datos.filter(d =>
-    d.temperatura < RANGOS.temperatura.min || d.temperatura > RANGOS.temperatura.max ||
-    d.presion < RANGOS.presion.min || d.presion > RANGOS.presion.max ||
-    d.humedad < RANGOS.humedad.min || d.humedad > RANGOS.humedad.max
-  );
-
-  mostrarAlertas(alertas);
-}
 
 function mostrarAlertas(alertas) {
   let panel = document.getElementById('alertas');
@@ -187,6 +178,58 @@ function mostrarAlertas(alertas) {
       Temp: ${a.temperatura}°C | Presión: ${a.presion} | Humedad: ${a.humedad}%
     </p>`).join('');
 }
+
+
+async function detectarAlertas(datos) {
+  const alertas = datos.filter(d =>
+    d.temperatura < RANGOS.temperatura.min || d.temperatura > RANGOS.temperatura.max ||
+    d.presion < RANGOS.presion.min || d.presion > RANGOS.presion.max ||
+    d.humedad < RANGOS.humedad.min || d.humedad > RANGOS.humedad.max
+  );
+
+  // Enviar cada alerta a la API
+  for (const alerta of alertas) {
+    await reportarAlerta(alerta);
+  }
+
+  mostrarAlertas(alertas);
+}
+
+// Nueva función para enviar la alerta a la API
+async function reportarAlerta(alerta) {
+  // Determinar tipo_alerta_id según el tipo de alerta (ajusta según tu lógica)
+  let tipo_alerta_id = null;
+  if (alerta.temperatura < RANGOS.temperatura.min) tipo_alerta_id = 1; // Bajo el rango
+  else if (alerta.temperatura > RANGOS.temperatura.max) tipo_alerta_id = 2; // Sobre el rango
+  else if (alerta.presion < RANGOS.presion.min) tipo_alerta_id = 3;
+  else if (alerta.presion > RANGOS.presion.max) tipo_alerta_id = 4;
+  else if (alerta.humedad < RANGOS.humedad.min) tipo_alerta_id = 5;
+  else if (alerta.humedad > RANGOS.humedad.max) tipo_alerta_id = 6;
+
+  // Busca el id de la lectura (puede que necesites ajustarlo si tu API lo retorna con otro nombre)
+  const lectura_id = alerta.id || alerta.lectura_id;
+
+  // Fecha de generación de la alerta (puedes usar la fecha de la lectura o la actual)
+  const fecha_generada = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+  // Solo reporta si tienes los datos necesarios
+  if (lectura_id && tipo_alerta_id) {
+    try {
+      await fetch('http://localhost:5000/alertas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lectura_id,
+          tipo_alerta_id,
+          fecha_generada
+        })
+      });
+    } catch (e) {
+      console.error('Error reportando alerta:', e);
+    }
+  }
+}
+
 
 window.onload = () => {
   inicializarGraficos();

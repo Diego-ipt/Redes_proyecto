@@ -105,5 +105,27 @@ def insertar_lectura():
     conn.close()
     return jsonify({"mensaje": "Lectura insertada correctamente"}), 201
 
+def agregar_tipos_alerta_predeterminados():
+    tipos = [
+        "Temperatura bajo el rango",
+        "Temperatura sobre el rango",
+        "Presión bajo el rango",
+        "Presión sobre el rango",
+        "Humedad bajo el rango",
+        "Humedad sobre el rango"
+    ]
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    for descripcion in tipos:
+        try:
+            cursor.execute("INSERT INTO Tipo_Alerta (descripcion) VALUES (?)", (descripcion,))
+        except sqlite3.IntegrityError:
+            pass  # Ya existe, ignorar
+    conn.commit()
+    conn.close()
+
+# Llama a la función al iniciar el servidor
+agregar_tipos_alerta_predeterminados()
+
 if __name__ == "__main__":
     app.run(debug=True)
