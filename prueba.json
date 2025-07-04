@@ -20,5 +20,8 @@
     { "sensor_id": 19, "fecha_hora": "2025-07-01T11:40:00", "temperatura": 25.0, "presion": 1013, "humedad": 40 },
     { "sensor_id": 20, "fecha_hora": "2025-07-01T11:45:00", "temperatura": 26.1, "presion": 1010, "humedad": 44 },
     { "sensor_id": 21, "fecha_hora": "2025-07-01T11:50:00", "temperatura": 24.9, "presion": 1013, "humedad": 41 },
-    { "sensor_id": 22, "fecha_hora": "2025-07-01T11:55:00", "temperatura": 25.3, "presion": 1012, "humedad": 42 }
+    { "sensor_id": 22, "fecha_hora": "2025-07-01T11:55:00", "temperatura": 25.3, "presion": 1012, "humedad": 42 },
+    { "sensor_id": 30, "fecha_hora": "2025-07-01T12:00:00", "temperatura": 38.5, "presion": 1013, "humedad": 40 },
+    { "sensor_id": 31, "fecha_hora": "2025-07-01T12:05:00", "temperatura": 24.5, "presion": 1120, "humedad": 42 },
+    { "sensor_id": 32, "fecha_hora": "2025-07-01T12:10:00", "temperatura": 23.8, "presion": 1011, "humedad": 15.2 }
 ]
