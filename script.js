@@ -2,9 +2,9 @@ let tabla;
 let chartTemp, chartPresion, chartHumedad;
 
 const RANGOS = {
-  temperatura: { min: 10, max: 37 },
-  presion: { min: 950, max: 1100 },
-  humedad: { min: 20, max: 85 }
+  temperatura: { min: 20.00, max: 29.99 },
+  presion: { min: 1000.0, max: 1049.9 },
+  humedad: { min: 30.0, max: 99.9 }
 };
 
 // función que inicia el clienteConsulta
