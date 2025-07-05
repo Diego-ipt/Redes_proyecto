@@ -6,6 +6,8 @@
 #include <ctime>
 #include <cstring>
 
+#pragma pack(push, 1)
+
 // Estructura extendida para incluir la firma
 struct LecturaBinFirmada {
     int32_t sensor_id;
@@ -17,6 +19,8 @@ struct LecturaBinFirmada {
     uint8_t firma_r[32];
     uint8_t firma_s[32];
 };
+
+#pragma pack(pop) 
 
 // Simulación de función hash SHA256 (solo para ejemplo)
 void FakeSha256(const void* data, size_t len, uint8_t out[32]) {
@@ -46,6 +50,7 @@ struct LecturaBin {
 
 int main(int argc, char* argv[]) {
     // Bucle de envío cada 1 segundo
+    srand(time(NULL));
     while(true) {
         int sock = socket(AF_INET, SOCK_STREAM, 0);
         if(sock < 0) {
@@ -67,7 +72,7 @@ int main(int argc, char* argv[]) {
 
 
         // Simular datos de la tabla Lectura
-        srand(time(NULL));
+
         int sensor_id = 1;
         float temperatura, presion, humedad;
         // Probabilidad de 0.5% de datos fuera de rango
@@ -115,6 +120,23 @@ int main(int argc, char* argv[]) {
         LecturaBinFirmada lectura_firmada;
         std::memcpy(&lectura_firmada, &lectura, sizeof(LecturaBin));
         SignMessage(&lectura, sizeof(LecturaBin), lectura_firmada.firma_r, lectura_firmada.firma_s);
+
+        // Imprimir payload (primeros 34 bytes)
+        // std::cout << "Payload enviado (hex): ";
+        // const uint8_t* ptr = reinterpret_cast<const uint8_t*>(&lectura_firmada);
+        // for (size_t i = 0; i < sizeof(LecturaBin); ++i)
+        //     printf("%02X", ptr[i]);
+        // std::cout << std::endl;
+
+        // uint32_t* temp_bits = reinterpret_cast<uint32_t*>(&lectura.temperatura);
+        // uint32_t* pres_bits = reinterpret_cast<uint32_t*>(&lectura.presion);
+        // uint32_t* hum_bits  = reinterpret_cast<uint32_t*>(&lectura.humedad);
+        
+        // std::cout << "Sensor ID (C++): " << lectura.sensor_id << std::endl;
+
+        // std::cout << "Bits temperatura: 0x" << std::hex << *temp_bits << std::endl;
+        // std::cout << "Bits presion:     0x" << std::hex << *pres_bits << std::endl;
+        // std::cout << "Bits humedad:     0x" << std::hex << *hum_bits  << std::endl;
 
         // Enviar estructura firmada
         send(sock, &lectura_firmada, sizeof(lectura_firmada), 0);
