@@ -142,14 +142,15 @@ function actualizarGraficosDesdeTabla() {
     chart.data.datasets[0].data = datos;
     chart.options.scales.x.min = minFecha;
     chart.options.scales.x.max = maxFecha;
-    chart.options.scales.y.min = minY - 1;
-    chart.options.scales.y.max = maxY + 1;
+    chart.options.scales.y.min = minY;
+    chart.options.scales.y.max = maxY;
     chart.update();
   }
 
-  actualizar(chartTemp, tempData, Math.min(...tempData), Math.max(...tempData));
-  actualizar(chartPresion, presionData, Math.min(...presionData), Math.max(...presionData));
-  actualizar(chartHumedad, humedadData, Math.min(...humedadData), Math.max(...humedadData));
+  //rangos fijos definidos
+  actualizar(chartTemp, tempData, RANGOS.temperatura.min, RANGOS.temperatura.max);
+  actualizar(chartPresion, presionData, RANGOS.presion.min, RANGOS.presion.max);
+  actualizar(chartHumedad, humedadData, RANGOS.humedad.min, RANGOS.humedad.max);
 }
 
 
