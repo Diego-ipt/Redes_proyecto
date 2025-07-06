@@ -81,8 +81,8 @@ def handle_client(conn: socket.socket):
 
         # envviar lectura al servidor final
         json_payload = {
-            "sensorId": sensor_id,
-            "fecha": fecha,
+            "sensor_id": sensor_id,
+            "fecha_hora": fecha,
             "temperatura": temp,
             "presion": pres,
             "humedad": hum

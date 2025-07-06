@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 import sqlite3
 
 app = Flask(__name__)
-DB_PATH = "IoT_Distribuida.db"
+DB_PATH = "bdd/IoT_Distribuida.db"
 COLUMNAS = ["lectura_id", "sensor_id", "fecha_hora", "temperatura", "presion", "humedad"]
 
 # ver todas las lecturas

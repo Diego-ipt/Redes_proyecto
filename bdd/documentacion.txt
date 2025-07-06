@@ -43,28 +43,27 @@ CREATE TABLE Log_Evento (
     estado TEXT NOT NULL
 );
 
-#################################################################################
-Sensor: (en este caso solo deberiamos usar uno)
-Sirve como referencia para las lecturas que llegan desde ese sensor.
+--Sensor: (en este caso solo deberiamos usar uno)
+--Sirve como referencia para las lecturas que llegan desde ese sensor.
 
-Lectura: Registra cada paquete de datos recibido desde un sensor: temperatura, presión y humedad con su fecha y hora.
+--Lectura: Registra cada paquete de datos recibido desde un sensor: temperatura, presión y humedad con su fecha y hora.
 
-Tipo_Alerta: tabla auxiliar para tener bien definidos los tipos de alerta.
+--Tipo_Alerta: tabla auxiliar para tener bien definidos los tipos de alerta.
 
-Alerta: tabla auxiliar para mayor trazabilidad de los sensores. Es especifico para anomalias de datos
+--Alerta: tabla auxiliar para mayor trazabilidad de los sensores. Es especifico para anomalias de datos
 
-Log_Evento: Registra eventos del sistema. (no confundir con alerta, esto es para casos externos a los datos de sensores)
-evento y estado es muy general para permitir mayor flexibilidad en lo que se desea registrar.
-Ejemplos:
-INSERT INTO Log_Evento (evento, fecha_hora, estado)
-VALUES (
-  'Servidor intermedio conectado exitosamente al servidor final',
-  '2025-06-17 19:30:00',
-  'OK'
-);
-INSERT INTO Log_Evento (evento, fecha_hora, estado)
-VALUES (
-  'Error al recibir paquete desde Cliente Sensor',
-  '2025-06-17 19:32:45',
-  'ERROR'
-);
+--Log_Evento: Registra eventos del sistema. (no confundir con alerta, esto es para casos externos a los datos de sensores)
+--evento y estado es muy general para permitir mayor flexibilidad en lo que se desea registrar.
+--Ejemplos:
+--INSERT INTO Log_Evento (evento, fecha_hora, estado)
+--VALUES (
+--  'Servidor intermedio conectado exitosamente al servidor final',
+--  '2025-06-17 19:30:00',
+--  'OK'
+--);
+--INSERT INTO Log_Evento (evento, fecha_hora, estado)
+--VALUES (
+--  'Error al recibir paquete desde Cliente Sensor',
+--  '2025-06-17 19:32:45',
+--  'ERROR'
+--);
