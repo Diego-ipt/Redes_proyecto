@@ -74,10 +74,10 @@ function crearGrafico(ctx, label, borderColor, bgColor) {
         x: {
           type: 'time',
           time: {
-            parser: "yyyy-MM-dd'T'HH:mm:ss",
-            tooltipFormat: 'PPpp',
             unit: 'minute',
-            displayFormats: { minute: 'HH:mm' }
+            displayFormats: {
+              minute: 'HH:mm'
+            }
           },
           title: { display: true, text: 'Fecha y Hora' },
           min: null,
@@ -133,12 +133,14 @@ function actualizarGraficosDesdeTabla() {
   const presionData = filas.map(f => parseFloat(f[3]));
   const humedadData = filas.map(f => parseFloat(f[4]));
 
-  const parseFechas = labels.map(d => new Date(d).getTime());
+  const labelsISO = labels.map(f => f.replace(' ', 'T'));
+
+  const parseFechas = labelsISO.map(d => new Date(d).getTime());
   const minFecha = Math.min(...parseFechas);
   const maxFecha = Math.max(...parseFechas);
 
   function actualizar(chart, datos, minY, maxY) {
-    chart.data.labels = labels;
+    chart.data.labels = labelsISO; // <-- usa labelsISO aquí
     chart.data.datasets[0].data = datos;
     chart.options.scales.x.min = minFecha;
     chart.options.scales.x.max = maxFecha;

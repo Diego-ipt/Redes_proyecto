@@ -26,6 +26,8 @@ def get_lecturas():
 # ver lectura desde fecha_hora en adelante
 @app.route("/lecturas/desde/<fecha_hora>", methods=["GET"])
 def get_lecturas_desde(fecha_hora): 
+    # Reemplaza la T por espacio si existe
+    fecha_hora = fecha_hora.replace("T", " ")
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM Lectura WHERE fecha_hora >= ?", (fecha_hora,))
