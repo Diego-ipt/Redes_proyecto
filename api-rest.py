@@ -1,9 +1,16 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
 import sqlite3
+import os
 
 app = Flask(__name__)
 DB_PATH = "bdd/IoT_Distribuida.db"
 COLUMNAS = ["lectura_id", "sensor_id", "fecha_hora", "temperatura", "presion", "humedad"]
+
+
+@app.route("/")
+def index():
+    return render_template("index.html")
 
 # ver todas las lecturas
 @app.route("/lecturas", methods=["GET"])
