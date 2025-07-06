@@ -19,10 +19,10 @@ async function cargarDatos() {
     const ahora = new Date();
     const hace8h = new Date(ahora.getTime() - 8 * 60 * 60 * 1000);
     // Formato: YYYY-MM-DDTHH:mm:ss
-    const fechaStr = hace8h.toISOString().slice(0,19);
+    const fechaStr = hace8h.toISOString().slice(0,19).replace('T', ' ');
 
     // Llama al endpoint filtrado
-    const response = await fetch(`http://localhost:5000/lecturas/desde/${fechaStr}`);
+    const response = await fetch(`/lecturas/desde/${fechaStr}`);
     const datos = await response.json();
 
     actualizarTabla(datos);

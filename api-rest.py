@@ -1,16 +1,9 @@
 from flask import Flask, request, jsonify, render_template
-from flask_cors import CORS
 import sqlite3
-import os
 
 app = Flask(__name__)
 DB_PATH = "bdd/IoT_Distribuida.db"
 COLUMNAS = ["lectura_id", "sensor_id", "fecha_hora", "temperatura", "presion", "humedad"]
-
-
-@app.route("/")
-def index():
-    return render_template("index.html")
 
 # ver todas las lecturas
 @app.route("/lecturas", methods=["GET"])
@@ -26,8 +19,6 @@ def get_lecturas():
 # ver lectura desde fecha_hora en adelante
 @app.route("/lecturas/desde/<fecha_hora>", methods=["GET"])
 def get_lecturas_desde(fecha_hora): 
-    # Reemplaza la T por espacio si existe
-    fecha_hora = fecha_hora.replace("T", " ")
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM Lectura WHERE fecha_hora >= ?", (fecha_hora,))
@@ -86,8 +77,6 @@ def get_lecturas_por_sensor(sensor_id):
     data = [dict(zip(COLUMNAS, row)) for row in rows]
     return jsonify(data)
 
-
-
 # insertar lectura
 @app.route("/lecturas", methods=["POST"])
 def insertar_lectura():
@@ -135,6 +124,11 @@ def agregar_tipos_alerta_predeterminados():
 
 # Llama a la función al iniciar el servidor
 agregar_tipos_alerta_predeterminados()
+
+
+@app.route("/")
+def index():
+    return render_template("index.html")
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -25,5 +25,5 @@ python server-intermedio.py
 
 - Y compilar y ejecutar el Cliente Sensor en C++
 
-g++ cliente_sensor.cpp -o cliente
+g++ outdata.cpp -o cliente
 ./cliente
