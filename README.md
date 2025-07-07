@@ -1,29 +1,59 @@
-Requisitos del Sistema
+# 📡 Proyecto semestral Redes de Computadores: Plataforma IoT Distribuida y Segura para Monitoreo Industrial
 
-- Python Versión recomendada: Python 3.10+
+## 🧰 Requisitos del Sistema
 
-- Crear y activar un entorno virtual:
+* **Python**: Versión recomendada **3.10** o superior
+* **C++**: Para compilar el cliente sensor
+* **Sistema operativo**: Linux (probado en Linux Mint 22.1 Cinnamon) , también puede adaptarse a otros
 
+---
+
+## ⚙️ Configuración del entorno
+
+1. **Crear y activar entorno virtual de Python:**
+
+```bash
 python3 -m venv venv
-
 source venv/bin/activate
+```
 
+2. **Instalar dependencias requeridas:**
 
-- Instalar Flask para crear el servidor local, request y pymodbus para el servidor intermedio: 
-
+```bash
 pip install Flask==2.3.3 requests==2.31.0 pymodbus==3.5.4
+```
 
+---
 
-- Finalmente, ejecutar la API rest:
+## 🚀 Ejecución de los componentes
 
+1. **Iniciar la API REST (servidor final):**
+
+```bash
 python api-rest.py
+```
 
+2. **Iniciar el servidor intermedio (recepción de datos binarios + Modbus TCP):**
 
-- El servidor intermedio:
-
+```bash
 python server-intermedio.py
+```
 
-- Y compilar y ejecutar el Cliente Sensor en C++
+3. **Compilar y ejecutar el Cliente Sensor en C++:**
 
+```bash
 g++ outdata.cpp -o cliente
 ./cliente
+```
+
+---
+
+## 🖥️ Interfaz Web
+
+Una vez todo esté en funcionamiento, puedes abrir tu navegador y visitar:
+
+```
+http://localhost:5000
+```
+
+Desde allí podrás visualizar las métricas, los gráficos y las alertas en tiempo real.
