@@ -51,8 +51,22 @@ def insertar_alerta():
     campos = ["lectura_id", "tipo_alerta_id", "fecha_generada"]
     if not all(c in data for c in campos):
         return jsonify({"error": "campos insuficientes"}), 400
+
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
+
+    # Verificar si ya existe una alerta con la misma lectura y tipo
+    cursor.execute("""
+        SELECT 1 FROM Alerta
+        WHERE lectura_id = ? AND tipo_alerta_id = ?
+    """, (data["lectura_id"], data["tipo_alerta_id"]))
+    existe = cursor.fetchone()
+
+    if existe:
+        conn.close()
+        return jsonify({"mensaje": "Alerta ya registrada"}), 200
+
+    # Insertar nueva alerta
     cursor.execute("""
         INSERT INTO Alerta (lectura_id, tipo_alerta_id, fecha_generada)
         VALUES (?, ?, ?)
@@ -64,7 +78,6 @@ def insertar_alerta():
     conn.commit()
     conn.close()
     return jsonify({"mensaje": "Alerta insertada correctamente"}), 201
-
 
 # ver lecturas por sensor_id
 @app.route("/lecturas/<int:sensor_id>", methods=["GET"])

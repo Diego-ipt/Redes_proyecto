@@ -74,12 +74,16 @@ def handle_client(conn: socket.socket):
 
         print("FIRMA VÁLIDA\n")
 
+        temp = round(temp, 2)
+        pres = round(pres, 2)
+        hum = round(hum, 2)
+
         # actualizar registros Modbus
         update_registers(0, temp)
         update_registers(2, pres)
         update_registers(4, hum)
 
-        # envviar lectura al servidor final
+        # enviar lectura al servidor final
         json_payload = {
             "sensor_id": sensor_id,
             "fecha_hora": fecha,
@@ -87,6 +91,7 @@ def handle_client(conn: socket.socket):
             "presion": pres,
             "humedad": hum
         }
+
         try:
             resp = requests.post("http://localhost:5000/lecturas",
                                  json=json_payload,

@@ -82,3 +82,11 @@ canvas {
   color: #9ca3af !important;
   cursor: not-allowed !important;
 }
+
+
+.chart-interval {
+  text-align: center;
+  font-size: 0.9em;
+  color: #555;
+  margin-bottom: 5px;
+}

@@ -31,6 +31,7 @@ CREATE TABLE Alerta (
     lectura_id INTEGER NOT NULL,
     tipo_alerta_id INTEGER NOT NULL,
     fecha_generada DATETIME NOT NULL,
+    UNIQUE (lectura_id, tipo_alerta_id),
     FOREIGN KEY (lectura_id) REFERENCES Lectura(lectura_id),
     FOREIGN KEY (tipo_alerta_id) REFERENCES Tipo_Alerta(tipo_alerta_id)
 );

@@ -20,9 +20,9 @@
         <tr>
           <th>Sensor ID</th>
           <th>Fecha y Hora</th>
-          <th>Temperatura</th>
+          <th>Temperatura (°C)</th>
           <th>Presión</th>
-          <th>Humedad</th>
+          <th>Humedad (%)</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -30,18 +30,23 @@
 
     <div id="charts">
       <div class="chart-container">
-        <div class="chart-title">Temperatura</div>
-        <canvas id="chartTemp"></canvas>
-      </div>
-      <div class="chart-container">
-        <div class="chart-title">Presión</div>
-        <canvas id="chartPresion"></canvas>
-      </div>
-      <div class="chart-container">
-        <div class="chart-title">Humedad</div>
-        <canvas id="chartHumedad"></canvas>
-      </div>
+      <div class="chart-title">Temperatura</div>
+      <div id="intervalTemp" class="chart-interval"></div>
+      <canvas id="chartTemp"></canvas>
     </div>
+
+    <div class="chart-container">
+      <div class="chart-title">Presión</div>
+      <div id="intervalPresion" class="chart-interval"></div>
+      <canvas id="chartPresion"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <div class="chart-title">Humedad</div>
+      <div id="intervalHumedad" class="chart-interval"></div>
+      <canvas id="chartHumedad"></canvas>
+    </div>
+
   </div>
 
   <script src="{{ url_for('static', filename='script.js') }}"></script>

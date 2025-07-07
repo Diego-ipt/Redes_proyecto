@@ -1,5 +1,9 @@
 let tabla;
 let chartTemp, chartPresion, chartHumedad;
+let ultimoLecturaIdProcesado = null;
+const alertasReportadas = new Set();
+const alertasVisibles = new Map();
+const DURACION_ALERTA_MS = 10000; 
 
 const RANGOS = {
   temperatura: { min: 20.00, max: 29.99 },
@@ -7,26 +11,27 @@ const RANGOS = {
   humedad: { min: 30.0, max: 99.9 }
 };
 
-// función que inicia el clienteConsulta
+window.onload = () => {
+  inicializarGraficos();
+  iniciarClienteConsulta();
+};
+
 async function iniciarClienteConsulta() {
   await cargarDatos();
-  setInterval(cargarDatos, 5000);
+  setInterval(cargarDatos, 1000); // actualiza cada segundo
 }
 
 async function cargarDatos() {
   try {
-    // Calcula la fecha/hora de hace 8 horas
     const ahora = new Date();
     const hace8h = new Date(ahora.getTime() - 8 * 60 * 60 * 1000);
-    // Formato: YYYY-MM-DDTHH:mm:ss
-    const fechaStr = hace8h.toISOString().slice(0,19).replace('T', ' ');
+    const fechaStr = hace8h.toISOString().slice(0, 19).replace('T', ' ');
 
-    // Llama al endpoint filtrado
     const response = await fetch(`/lecturas/desde/${fechaStr}`);
     const datos = await response.json();
 
     actualizarTabla(datos);
-    actualizarGraficosDesdeTabla();
+    actualizarGraficosDesdeDatos(datos);
     detectarAlertas(datos);
   } catch (error) {
     console.error("Error al obtener datos:", error);
@@ -54,14 +59,16 @@ function actualizarTabla(datos) {
       pageLength: 10,
       lengthChange: false,
       searching: false,
-      ordering: false,
-      language: { url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" }, //idioma español
-      initComplete: actualizarGraficosDesdeTabla
+      ordering: true,
+      order: [[1, 'desc']],
+      language: {
+        url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
+      }
     });
-
-    tabla.on('draw', actualizarGraficosDesdeTabla);
   } else {
-    tabla.clear().rows.add($('#tabla-lecturas tbody tr')).draw();
+    tabla.clear();
+    tabla.rows.add($('#tabla-lecturas tbody tr'));
+    tabla.draw(false);
   }
 }
 
@@ -70,19 +77,32 @@ function crearGrafico(ctx, label, borderColor, bgColor) {
     type: 'line',
     options: {
       responsive: true,
+      animation: {
+        duration: 500,
+        easing: 'easeOutQuart'
+      },
       scales: {
         x: {
           type: 'time',
           time: {
-            unit: 'minute',
+            unit: 'second',
             displayFormats: {
-              minute: 'HH:mm'
+              second: 'HH:mm:ss'
             }
           },
           title: { display: true, text: 'Fecha y Hora' },
-          min: null,
+          ticks: {
+            autoSkip: false,
+            maxTicksLimit: 10,
+            callback: function(value) {
+              const date = new Date(value);
+              return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            }
+          },
+          min: null, // se asigna dinámicamente
           max: null
-        },
+        }
+        ,
         y: {
           beginAtZero: false,
           min: null,
@@ -125,22 +145,40 @@ function inicializarGraficos() {
   );
 }
 
-function actualizarGraficosDesdeTabla() {
-  const filas = tabla.rows({ page: 'current' }).data().toArray();
+function actualizarGraficosDesdeDatos(datos) {
+  if (!datos || datos.length === 0) return;
 
-  const labels = filas.map(f => f[1]);
-  const tempData = filas.map(f => parseFloat(f[2]));
-  const presionData = filas.map(f => parseFloat(f[3]));
-  const humedadData = filas.map(f => parseFloat(f[4]));
+  datos.sort((a, b) => new Date(a.fecha_hora) - new Date(b.fecha_hora));
+  const ultimos = datos.slice(-10);
+  const fechaInferior = ultimos[0].fecha_hora;
+  const fechaSuperior = datos[datos.length - 1].fecha_hora;
 
-  const labelsISO = labels.map(f => f.replace(' ', 'T'));
 
-  const parseFechas = labelsISO.map(d => new Date(d).getTime());
+  const labels = ultimos.map(d => d.fecha_hora.replace(' ', 'T'));
+  const tempData = ultimos.map(d => d.temperatura);
+  const presionData = ultimos.map(d => d.presion);
+  const humedadData = ultimos.map(d => d.humedad);
+
+  const parseFechas = labels.map(d => new Date(d).getTime());
   const minFecha = Math.min(...parseFechas);
   const maxFecha = Math.max(...parseFechas);
 
+
+  const formatHora = str => {
+  const date = new Date(str.replace(' ', 'T'));
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  };
+
+  const intervaloTexto = `Intervalo: ${formatHora(fechaInferior)} – ${formatHora(fechaSuperior)}`;
+
+
+  document.getElementById('intervalTemp').textContent = intervaloTexto;
+  document.getElementById('intervalPresion').textContent = intervaloTexto;
+  document.getElementById('intervalHumedad').textContent = intervaloTexto;
+
+
   function actualizar(chart, datos, minY, maxY) {
-    chart.data.labels = labelsISO; // <-- usa labelsISO aquí
+    chart.data.labels = labels;
     chart.data.datasets[0].data = datos;
     chart.options.scales.x.min = minFecha;
     chart.options.scales.x.max = maxFecha;
@@ -149,48 +187,93 @@ function actualizarGraficosDesdeTabla() {
     chart.update();
   }
 
-  //rangos fijos definidos
   actualizar(chartTemp, tempData, RANGOS.temperatura.min, RANGOS.temperatura.max);
   actualizar(chartPresion, presionData, RANGOS.presion.min, RANGOS.presion.max);
   actualizar(chartHumedad, humedadData, RANGOS.humedad.min, RANGOS.humedad.max);
 }
 
+function mostrarAlertas(nuevasAlertas) {
+  const ahora = Date.now();
 
-function mostrarAlertas(alertas) {
-  let panel = document.getElementById('alertas');
-  if (!panel) {
-    panel = document.createElement('div');
-    panel.id = 'alertas';
-    panel.style.background = '#fee';
-    panel.style.border = '2px solid red';
-    panel.style.padding = '10px';
-    panel.style.margin = '20px auto';
-    panel.style.width = '80%';
-    panel.style.fontFamily = 'Arial';
-    document.body.insertBefore(panel, document.body.firstChild);
+  // Agregar nuevas alertas al mapa solo si son recientes
+  nuevasAlertas.forEach(alerta => {
+    const fechaMs = new Date(alerta.fecha_hora.replace(' ', 'T')).getTime();
+    if (ahora - fechaMs <= DURACION_ALERTA_MS) {
+      const clave = `${alerta.sensor_id}-${alerta.tipo_alerta_id}`;
+      alertasVisibles.set(clave, { ...alerta, timestamp: fechaMs });
+    }
+  });
+
+  // Eliminar alertas que ya pasaron
+  for (const [clave, alerta] of alertasVisibles.entries()) {
+    if (ahora - alerta.timestamp > DURACION_ALERTA_MS) {
+      alertasVisibles.delete(clave);
+    }
   }
 
-  if (alertas.length === 0) {
+  // Mostrar alertas activas
+  const panel = document.getElementById('alertas') || crearPanelAlertas();
+  const activas = Array.from(alertasVisibles.values());
+
+  if (activas.length === 0) {
     panel.innerHTML = `<h3>Sin alertas</h3>`;
     return;
   }
 
-  panel.innerHTML = `<h3>ALERTAS DETECTADAS!!!</h3>` + alertas.map(a => `
-    <p>
-      Sensor ${a.sensor_id} – ${a.fecha_hora}<br>
-      Temp: ${a.temperatura}°C | Presión: ${a.presion} | Humedad: ${a.humedad}%
-    </p>`).join('');
+  panel.innerHTML = `<h3>ALERTAS ACTIVAS</h3>` + activas.map(a => {
+    const tempStr = (a.temperatura < RANGOS.temperatura.min || a.temperatura > RANGOS.temperatura.max)
+      ? `<span style="color:red; text-decoration: underline;">${a.temperatura}°C</span>`
+      : `${a.temperatura}°C`;
+
+    const presStr = (a.presion < RANGOS.presion.min || a.presion > RANGOS.presion.max)
+      ? `<span style="color:red; text-decoration: underline;">${a.presion}</span>`
+      : `${a.presion}`;
+
+    const humStr = (a.humedad < RANGOS.humedad.min || a.humedad > RANGOS.humedad.max)
+      ? `<span style="color:red; text-decoration: underline;">${a.humedad}%</span>`
+      : `${a.humedad}%`;
+
+    return `
+      <p>
+        Sensor ${a.sensor_id} – ${a.fecha_hora}<br>
+        Temperatura: ${tempStr} | Presión: ${presStr} | Humedad: ${humStr}
+      </p>`;
+  }).join('');
 }
 
 
+function crearPanelAlertas() {
+  const panel = document.createElement('div');
+  panel.id = 'alertas';
+  panel.style.background = '#fee';
+  panel.style.border = '2px solid red';
+  panel.style.padding = '10px';
+  panel.style.margin = '20px auto';
+  panel.style.width = '80%';
+  panel.style.fontFamily = 'Arial';
+  document.body.insertBefore(panel, document.body.firstChild);
+  return panel;
+}
+
 async function detectarAlertas(datos) {
-  const alertas = datos.filter(d =>
+  if (!datos || datos.length === 0) return;
+
+  datos.sort((a, b) => new Date(a.fecha_hora) - new Date(b.fecha_hora));
+
+  const nuevasLecturas = ultimoLecturaIdProcesado
+    ? datos.filter(d => d.lectura_id > ultimoLecturaIdProcesado)
+    : datos;
+
+  if (nuevasLecturas.length === 0) return;
+
+  ultimoLecturaIdProcesado = Math.max(...nuevasLecturas.map(d => d.lectura_id));
+
+  const alertas = nuevasLecturas.filter(d =>
     d.temperatura < RANGOS.temperatura.min || d.temperatura > RANGOS.temperatura.max ||
     d.presion < RANGOS.presion.min || d.presion > RANGOS.presion.max ||
     d.humedad < RANGOS.humedad.min || d.humedad > RANGOS.humedad.max
   );
 
-  // Enviar cada alerta a la API
   for (const alerta of alertas) {
     await reportarAlerta(alerta);
   }
@@ -198,27 +281,22 @@ async function detectarAlertas(datos) {
   mostrarAlertas(alertas);
 }
 
-// Nueva función para enviar la alerta a la API
 async function reportarAlerta(alerta) {
-  // Determinar tipo_alerta_id según el tipo de alerta
   let tipo_alerta_id = null;
-  if (alerta.temperatura < RANGOS.temperatura.min) tipo_alerta_id = 1; // Bajo el rango
-  else if (alerta.temperatura > RANGOS.temperatura.max) tipo_alerta_id = 2; // Sobre el rango
+  if (alerta.temperatura < RANGOS.temperatura.min) tipo_alerta_id = 1;
+  else if (alerta.temperatura > RANGOS.temperatura.max) tipo_alerta_id = 2;
   else if (alerta.presion < RANGOS.presion.min) tipo_alerta_id = 3;
   else if (alerta.presion > RANGOS.presion.max) tipo_alerta_id = 4;
   else if (alerta.humedad < RANGOS.humedad.min) tipo_alerta_id = 5;
   else if (alerta.humedad > RANGOS.humedad.max) tipo_alerta_id = 6;
 
-  // Busca el id de la lectura
-  const lectura_id = alerta.id || alerta.lectura_id;
+  const lectura_id = alerta.lectura_id;
+  const fecha_generada = alerta.fecha_hora;
+  const clave = `${lectura_id}-${tipo_alerta_id}`;
 
-  // Fecha de generación de la alerta
-  const fecha_generada = new Date().toISOString().slice(0, 19).replace('T', ' ');
-
-  // Solo reporta si tienes los datos necesarios
-  if (lectura_id && tipo_alerta_id) {
+  if (lectura_id && tipo_alerta_id && !alertasReportadas.has(clave)) {
     try {
-      await fetch('http://localhost:5000/alertas', {
+      await fetch('/alertas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -227,14 +305,10 @@ async function reportarAlerta(alerta) {
           fecha_generada
         })
       });
+      alertasReportadas.add(clave); // marcar como enviada
     } catch (e) {
       console.error('Error reportando alerta:', e);
     }
   }
 }
 
-
-window.onload = () => {
-  inicializarGraficos();
-  iniciarClienteConsulta();
-};
