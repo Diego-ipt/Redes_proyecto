@@ -20,7 +20,7 @@ source venv/bin/activate
 2. **Instalar dependencias requeridas:**
 
 ```bash
-pip install Flask==2.3.3 requests==2.31.0 pymodbus==3.5.4
+pip install -r requirements.txt
 ```
 
 ---
